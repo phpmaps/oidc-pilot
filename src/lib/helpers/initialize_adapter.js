@@ -1,7 +1,7 @@
 import * as util from 'node:util';
 
 import MemoryAdapter from '../adapters/memory_adapter.js';
-import RedisAdapter from '../../example/adapters/redis.js';
+import RedisAdapter from '../adapters/redis.js';
 import instance from './weak_cache.js';
 import * as attention from './attention.js';
 import isConstructable from './type_validators.js';

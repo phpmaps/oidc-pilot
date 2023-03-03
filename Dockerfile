@@ -8,4 +8,4 @@ RUN npm install --only=production
 
 COPY . ./
 
-CMD [ "node", "./example/express.js" ]
+CMD [ "node", "./src/server/express.js" ]

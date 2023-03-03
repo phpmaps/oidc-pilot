@@ -6,7 +6,7 @@ import * as util from 'node:util';
 import * as os from 'node:os';
 
 import MemoryAdapter from '../adapters/memory_adapter.js';
-import RedisAdapter from '../../example/adapters/redis.js';
+import RedisAdapter from '../adapters/redis.js';
 import { DEV_KEYSTORE } from '../consts/index.js';
 
 import * as base64url from './base64url.js';
@@ -538,19 +538,19 @@ function makeDefaults() {
      * live with this limitation you will be required to provide your own custom adapter constructor
      * for oidc-provider to use. This constructor will be called for every model accessed the first
      * time it is needed.
-     * The API oidc-provider expects is documented [here](/example/my_adapter.js).
+     * The API oidc-provider expects is documented [here](/my_adapter.js).
      *
      * example: MongoDB adapter implementation
      *
-     * See [/example/adapters/mongodb.js](/example/adapters/mongodb.js)
+     * See [/adapters/mongodb.js](/adapters/mongodb.js)
      *
      * example: Redis adapter implementation
      *
-     * See [/example/adapters/redis.js](/example/adapters/redis.js)
+     * See [/adapters/redis.js](/adapters/redis.js)
      *
      * example: Redis w/ ReJSON adapter implementation
      *
-     * See [/example/adapters/redis_rejson.js](/example/adapters/redis_rejson.js)
+     * See [/adapters/redis_rejson.js](/adapters/redis_rejson.js)
      *
      * example: Default in-memory adapter implementation
      *
