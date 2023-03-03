@@ -1,10 +1,10 @@
 export default {
   clients: [
     {
-      client_id: 'ping',
-      client_secret: 'abc',
+      client_id: process.env.OIDC_CLIENT_ID,
+      client_secret: process.env.OIDC_SECRET,
       grant_types: ['refresh_token', 'authorization_code'],
-      redirect_uris: ['https://oidcdebugger.com/debug'],
+      redirect_uris: [process.env.OIDC_REDIRECT_1, process.env.OIDC_REDIRECT_2, process.env.OIDC_REDIRECT_3]
     }
   ],
   interactions: {
