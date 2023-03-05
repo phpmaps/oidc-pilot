@@ -153,15 +153,17 @@ export default (app, provider) => {
       if (interview && interview.id === req.body.interviewId && interview.uid) {
         console.log("condition passes");
         const incode = await initSession(clientTenant, 'login', interview.uid, req.body.interviewId);
-        // const scores = await getScores(clientTenant, incode.auth.interviewId, incode.header);
-        // const ocr = await getOcr(clientTenant, incode.auth.interviewId, incode.header)
-        // data = {
-        //   success: scores && ocr ? true : false,
-        //   scores: scores,
-        //   ocr: ocr
-        // }
+        const scores = await getScores(clientTenant, interview.id, incode.header);
+        const ocr = await getOcr(clientTenant, incode.id, incode.header);
+        const combined = {...scores.data, ...ocr.data};
+        const data = {
+          success: scores && ocr ? true : false,
+          ...combined,
+          raw_scores: scores.raw,
+          raw_ocr: ocr.raw
+        }
 
-        const account = await Account.findByLogin(req.body.interviewId, incode);
+        const account = await Account.findByLogin(req.body.interviewId, data);
 
         console.log(account);
 
