@@ -28,16 +28,38 @@ const debug = (obj) => querystring.stringify(Object.entries(obj).reduce((acc, [k
 
 export default (app, provider) => {
 
+  // app.use((req, res, next) => {
+  //   const orig = res.render;
+  //   // you'll probably want to use a full blown render engine capable of layouts
+  //   res.render = (view, locals) => {
+  //     app.render(view, locals, (err, html) => {
+  //       if (err) throw err;
+  //       orig.call(res, '_layout', {
+  //         ...locals,
+  //         body: html,
+  //       });
+  //     });
+  //   };
+  //   next();
+  // });
+
   app.use((req, res, next) => {
     const orig = res.render;
-    // you'll probably want to use a full blown render engine capable of layouts
     res.render = (view, locals) => {
       app.render(view, locals, (err, html) => {
-        if (err) throw err;
-        orig.call(res, '_layout', {
-          ...locals,
-          body: html,
-        });
+        if (view !== 'login') {
+          if (err) throw err;
+          orig.call(res, '_layout', {
+            ...locals,
+            body: html,
+          });
+
+        } else {
+          orig.call(res, view, {
+            ...locals
+          });
+        }
+
       });
     };
     next();
@@ -55,22 +77,26 @@ export default (app, provider) => {
       } = await provider.interactionDetails(req, res);
 
       const client = await provider.Client.find(params.client_id);
-
+      const frontendHostname = process.env.FRONTEND_HOSTNAME;
       const incode = await initSession(clientTenant, 'init', uid);
       const interviewId = incode.auth.interviewId;
       const apiUrl = clientTenant.API_URL;
-      incode.auth.uid = uid;
 
-      delete incode.client;
-      delete incode.header;
+      //const interview = JSON.stringify(incode);
+      const interview = JSON.stringify({
+        key: incode.auth.token,
+        id: incode.auth.interviewId,
+        uid: uid,
+        apiUrl: clientTenant.API_URL
+      });
 
-      const interview = JSON.stringify(incode);
 
 
       switch (prompt.name) {
         case 'login': {
           return res.render('login', {
             client,
+            frontendHostname,
             uid,
             interview,
             interviewId,
@@ -109,20 +135,24 @@ export default (app, provider) => {
 
   app.post('/interaction/:uid/login', setNoCache, body, async (req, res, next) => {
     try {
-      // console.log(":::BODY");
-      // console.log({
-      //   interviewId: req.body.interviewId,
-      //   apiUrl: req.body.apiUrl,
-      //   interview: req.body.interview
-      // })
+      console.log(":::LOGIN BODY");
+      console.log({
+        interviewId: req.body.interviewId,
+        interview: req.body.interview
+      })
       // console.log(req.body.interview);
 
-      const interview = JSON.parse(req.body.interview);
-      let data;
-      let incode;
 
-      if (req.body.interviewId) {
-        incode = await initSession(clientTenant, 'login', interview.auth.uid, req.body.interviewId);
+      const { grantId, params, prompt: { name } } = await provider.interactionDetails(req, res);
+
+      assert.equal(name, 'login');
+
+      const interview = JSON.parse(req.body.interview);
+
+      // Process interview and do digital verification 
+      if (interview && interview.id === req.body.interviewId && interview.uid) {
+        console.log("condition passes");
+        const incode = await initSession(clientTenant, 'login', interview.uid, req.body.interviewId);
         // const scores = await getScores(clientTenant, incode.auth.interviewId, incode.header);
         // const ocr = await getOcr(clientTenant, incode.auth.interviewId, incode.header)
         // data = {
@@ -130,34 +160,35 @@ export default (app, provider) => {
         //   scores: scores,
         //   ocr: ocr
         // }
-      }
 
-      const { grantId, params, prompt: { name } } = await provider.interactionDetails(req, res);
-      assert.equal(name, 'login');
-      const account = await Account.findByLogin(req.body.interviewId, incode);
+        const account = await Account.findByLogin(req.body.interviewId, incode);
 
-      console.log(account);
+        console.log(account);
 
-      let grant;
-      if (grantId) {
-        grant = await provider.Grant.find(grantId);
-      } else {
-        grant = new provider.Grant({ accountId: account.accountId, clientId: params.client_id });
-        if (params?.scope) {
-          grant.addOIDCScope(params?.scope);
+        let grant;
+        if (grantId) {
+          grant = await provider.Grant.find(grantId);
+        } else {
+          grant = new provider.Grant({ accountId: account.accountId, clientId: params.client_id });
+          if (params?.scope) {
+            grant.addOIDCScope(params?.scope);
+          }
         }
+
+        const result = {
+          consent: {
+            grantId: await grant.save()
+          },
+          login: {
+            accountId: account.accountId,
+          },
+        };
+
+        await provider.interactionFinished(req, res, result, { mergeWithLastSubmission: false });
       }
 
-      const result = {
-        consent: {
-          grantId: await grant.save()
-        },
-        login: {
-          accountId: account.accountId,
-        },
-      };
 
-      await provider.interactionFinished(req, res, result, { mergeWithLastSubmission: false });
+
     } catch (err) {
       next(err);
     }
