@@ -1,3 +1,5 @@
+let interval;
+
 window.onload = (event) => {
     const interviewId = document.getElementById('interviewId').value;
     const flow = JSON.parse(document.getElementById('interview').value);
@@ -9,6 +11,7 @@ window.onload = (event) => {
 const heartbeat = async (flow) => {
     const results = await doGet(flow);
     if (results.onboardingStatus === 'ONBOARDING_FINISHED') {
+        clearInterval(interval);
         setTimeout(() => {
             const interviewForm = document.getElementById('interviewForm');
             interviewForm.method = 'post';

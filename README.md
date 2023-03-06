@@ -1,142 +1,140 @@
-# oidc-provider
+# Incode OIDC Verification Server
 
-This module provides an OAuth 2.0 ([RFC 6749][oauth2]) Authorization Server with support for OpenID Connect ([OIDC][openid-connect]) and many
-other additional features and standards.
+This project is an minimal OIDC server compatible with Ping technologies and cloud hosting platforms.
 
-**Table of Contents**
+## Core features
+Users will be asked to prove their identity when this server receives requests from an OIDC client app.
+For the study, Incode has provided a custom "frontend" application that lives in a separate project. This application includes the physical identity proofing screens, which GSA can "plug-in" to this server.
 
-- [Implemented specs & features](#implemented-specs--features)
-- [Certification](#certification)
-- [Documentation & Configuration](#documentation--configuration)
-- [Recipes](#recipes)
-- [Events](#events)
+This plug in pattern enables a separation of concerns during the study.
 
-## Implemented specs & features
+It will allow GSA to update the "look and feel" of the application without impacting the core OIDC framework.
+Additionally, if there is an interest we can add and subtract Identity proofing modules during the study with things like Proof of Address, On-time-passcodes and e-Signature stuff for evaluation also without impacting the OIDC server. 
 
-The following specifications are implemented by oidc-provider (not exhaustive):
+This would be in addition to the default Identity Proofing modules of:
+* Liveness detection
+* Face Recognition
+* ID verification
 
-_Note that not all features are enabled by default, check the configuration section on how to enable them._
+When administering this server there are a couple of things to be aware of:
 
-- [`RFC6749` - OAuth 2.0][oauth2] & [`OIDC` Core 1.0][core]
-- [OIDC `Discovery 1.0`][discovery]
-- Dynamic Client Registration
-  - [OIDC `Dynamic Client Registration 1.0`][registration]
-  - [`RFC7591` - OAuth 2.0 Dynamic Client Registration Protocol][oauth2-registration]
-  - [`RFC7592` - OAuth 2.0 Dynamic Client Registration Management Protocol][registration-management]
-- [OIDC `RP-Initiated Logout 1.0`][rpinitiated-logout]
-- [OIDC `Back-Channel Logout 1.0`][backchannel-logout]
-- [`RFC7009` - OAuth 2.0 Token Revocation][revocation]
-- [`RFC7636` - Proof Key for Code Exchange (`PKCE`)][pkce]
-- [`RFC7662` - OAuth 2.0 Token Introspection][introspection]
-- [`RFC8252` - OAuth 2.0 for Native Apps BCP (`AppAuth`)][oauth-native-apps]
-- [`RFC8628` - OAuth 2.0 Device Authorization Grant (`Device Flow`)][device-flow]
-- [`RFC8705` - OAuth 2.0 Mutual TLS Client Authentication and Certificate Bound Access Tokens (`MTLS`)][mtls]
-- [`RFC8707` - OAuth 2.0 Resource Indicators][resource-indicators]
-- [`RFC9101` - OAuth 2.0 JWT-Secured Authorization Request (`JAR`)][jar]
-- [`RFC9126` - OAuth 2.0 Pushed Authorization Requests (`PAR`)][par]
-- [`RFC9207` - OAuth 2.0 Authorization Server Issuer Identifier in Authorization Response][iss-auth-resp]
-- [Financial-grade API Security Profile 1.0 - Part 2: Advanced (`FAPI 1.0`)][fapi]
-- [JWT Secured Authorization Response Mode for OAuth 2.0 (`JARM`)][jarm]
-- [OIDC Client Initiated Backchannel Authentication Flow (`CIBA`)][ciba]
+1. You must assign yourself your own OIDC Client ID, Secret and Redirect URL
+2. You must specify an OIDC Issuer Hostname
+3. You must specify your Incode API URL, API Client ID, Flow Id
+4. You must have a Redis Server for managing application state in Cloud Foundry or other cloud platforms
+5. You also must assign a Hostname for the frontend interaction screens
 
-Supported Access Token formats:
+All of this can be done but updating environment variables. If there are questions, Incode is happy to help with any setup and integration support.
 
-- Opaque
-- [JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens][jwt-at]
+## Prerequisites
 
-The following draft specifications are implemented by oidc-provider:
+This project has a minimum requirement of node __v16.17.0__ (Gallium).
 
-- [JWT Response for OAuth Token Introspection - draft 10][jwt-introspection]
-- [Financial-grade API: Client Initiated Backchannel Authentication Profile (`FAPI-CIBA`) - Implementer's Draft 01][fapi-ciba]
-- [OAuth 2.0 Demonstration of Proof-of-Possession at the Application Layer (`DPoP`) - draft 11][dpop]
+Commands for running the OIDC server locally
 
-Updates to draft specification versions are released as MINOR library versions,
-if you utilize these specification implementations consider using the tilde `~` operator in your
-package.json since breaking changes may be introduced as part of these version updates. Alternatively
-[acknowledge](/docs/README.md#features) the version and be notified of breaking changes as part of
-your CI.
+### Install required node packages
 
-## Certification
-[<img width="184" height="96" align="right" src="https://cdn.jsdelivr.net/gh/panva/node-oidc-provider@acd3ebf2f5ebbb5605463cb681a1fb2ab9742ace/OpenID_Certified.png" alt="OpenID Certification">][openid-certified-link]  
-Filip Skokan has [certified][openid-certified-link] that [oidc-provider][npm-url]
-conforms to the following profiles of the OpenID Connect™ protocol.
-
-- Basic, Implicit, Hybrid, Config, Dynamic, Form Post, and 3rd Party-Init OP profiles
-- Back-Channel Logout and RP-Initiated Logout
-- FAPI 1.0 Advanced (w/ Private Key JWT, MTLS, JARM, PAR, CIBA)
-
-## Sponsor
-
-[<img height="65" align="left" src="https://cdn.auth0.com/blog/github-sponsorships/brand-evolution-logo-Auth0-horizontal-Indigo.png" alt="auth0-logo">][sponsor-auth0] If you want to quickly add OpenID Connect authentication to Node.js apps, feel free to check out Auth0's Node.js SDK and free plan. [Create an Auth0 account; it's free!][sponsor-auth0]<br><br>
-
-## Support
-
-If you or your company use this module, or you need help using/upgrading the module, please consider becoming a [sponsor][support-sponsor] so I can continue maintaining it and adding new features carefree. The only way to guarantee you get feedback from the author & sole maintainer of this module is to support the package through GitHub Sponsors.
-
-## [Documentation](/docs/README.md) & Configuration
-
-oidc-provider can be mounted to existing connect, express, fastify, hapi, or koa applications, see
-[how](/docs/README.md#mounting-oidc-provider). The provider allows to be extended and configured in
-various ways to fit a variety of uses. See the [documentation](/docs/README.md) and [example folder](/example).
-
-```js
-import Provider from 'oidc-provider';
-const configuration = {
-  // refer to the documentation for other available configuration
-  clients: [{
-    client_id: 'foo',
-    client_secret: 'bar',
-    redirect_uris: ['http://lvh.me:8080/cb'],
-    // ... other client properties
-  }],
-};
-
-const oidc = new Provider('http://localhost:3000', configuration);
-
-oidc.listen(3000, () => {
-  console.log('oidc-provider listening on port 3000, check http://localhost:3000/.well-known/openid-configuration');
-});
+```
+npm install
 ```
 
+Run the project
 
-## Recipes
-Collection of useful configuration use cases are available over at [recipes](/recipes).
+```
+npm run start
+```
+
+This server will open on:
+
+* http://localhost:3000
+
+The OIDC Metadata can be access from:
+
+* http://localhost:3000/.well-known/openid-configuration
+
+## System environment
+
+Lastly, below are sample environmental variables to get you started. Please do change them :)
+
+```
+OIDC_ISSUER=http://localhost:3000
+FRONTEND_HOSTNAME=http://localhost:3000
+
+REDIS_HOST=3.239.44.132
+REDIS_PORT=6379
+REDIS_PASSWORD=abcd1234
+
+API_URL=https://demo-api.incodesmile.com/0
+API_KEY=8ea31b1619d4ec9a6905739f14a41866ea7f0d92
+API_VERSION=1.0
+CLIENT_ID=gsatss405
+FLOW_ID=63ed16977ded9e42dfcb6f61
+
+OIDC_CLIENT_ID=ping
+OIDC_SECRET=abc
+OIDC_REDIRECT_1=https://oidcdebugger.com/debug
+OIDC_REDIRECT_2=https://auth.pingone.com/09862d22-4554-4677-abf7-72fea5ae1fa0/davinci/oauth2/callback
+OIDC_REDIRECT_3=https://auth.pingone.com/e08ece74-1d3a-48ef-b796-d031b34597d3/davinci/oauth2/callback
+
+```
+
+Finally, as with OIDC technology client apps will recieve a JWT encoded id_token. This token will contain identity proofing results. See example below.
+
+This is what a "PASS" looks like from Incode.
+
+```
+
+{
+  "sub": "64066bd40089fa8a38421a18",
+  "nonce": "5a87zy15uo8",
+  "at_hash": "6IEMC906LE10d9JUeQgHVg",
+  "data": {
+    "success": true,
+    "interviewId": "64066bd40089fa8a38421a18",
+    "id": "64066bd40089fa8a38421a18",
+    "screenIdLiveness_value": "OK",
+    "screenIdLiveness_status": "OK",
+    "barcode2DDetected_status": "OK",
+    "barcodeContent_status": "OK",
+    "documentNumberCrosscheck_status": "OK",
+    "documentExpired_status": "OK",
+    "faceRecognition_maskCheck": {
+      "value": "0.0",
+      "status": "OK"
+    },
+    "faceRecognition_lensesCheck": "OK",
+    "faceRecognition_faceBrightness": "OK",
+    "faceRecognition_overall_value": "80.4",
+    "faceRecognition_overall_status": "OK",
+    "livenessScore_value": "78.1",
+    "livenessScore_status": "OK",
+    "photoQuality_value": "883.2",
+    "liveness_overall_value": "78.1",
+    "liveness_overall_status": "OK",
+    "overall_value": "86.2",
+    "overall_status": "OK",
+    "overall_reason": "This session passed because it passed all of Incode's tests: ID Verification, Face Recognition, Liveness Detection",
+    "fullName": "DOUG CARROLL",
+    "machineReadableFullName": "DOUGL CARROLL",
+    "firstName": "DOUG",
+    "middleName": "OWEN",
+    "givenName": "DOUG BARRETT",
+    "paternalLastName": "CARROLL",
+    "address": "992 SAN JACINTO ST REDLANDS CA 923730000 USA",
+    "documentNumber": "E3582769",
+    "typeOfId": "DriversLicense",
+    "gender": "M",
+    "fullNameMrz": "DOUG CARROLL",
+    "barcodeRawData": "@\n\u001e\rANSI 6360140436678DL00410287ZC03280024DLDAQE3666769\",
+    "issuedAt": "1-4-2023",
+    "expireAt": "4-21-2023",
+    "birthDate": "4-21-1978"
+  },
+  "aud": "ping",
+  "exp": 1678229000,
+  "iat": 1678142600,
+  "iss": "http://localhost:3000"
+}
 
 
-## Events
-oidc-provider instances are event emitters, using event handlers you can hook into the various
-actions and i.e. emit metrics that react to specific triggers. See the list of available emitted [event names](/docs/events.md) and their description.
-
-
-[npm-url]: https://www.npmjs.com/package/oidc-provider
-[openid-certified-link]: https://openid.net/certification/
-[openid-connect]: https://openid.net/connect/
-[core]: https://openid.net/specs/openid-connect-core-1_0.html
-[discovery]: https://openid.net/specs/openid-connect-discovery-1_0.html
-[oauth2-registration]: https://www.rfc-editor.org/rfc/rfc7591.html
-[registration]: https://openid.net/specs/openid-connect-registration-1_0.html
-[oauth2]: https://www.rfc-editor.org/rfc/rfc6749.html
-[oauth2-bearer]: https://www.rfc-editor.org/rfc/rfc6750.html
-[revocation]: https://www.rfc-editor.org/rfc/rfc7009.html
-[introspection]: https://www.rfc-editor.org/rfc/rfc7662.html
-[pkce]: https://www.rfc-editor.org/rfc/rfc7636.html
-[example-repo]: https://github.com/panva/node-oidc-provider-example
-[backchannel-logout]: https://openid.net/specs/openid-connect-backchannel-1_0-final.html
-[registration-management]: https://www.rfc-editor.org/rfc/rfc7592.html
-[oauth-native-apps]: https://www.rfc-editor.org/rfc/rfc8252.html
-[jar]: https://www.rfc-editor.org/rfc/rfc9101.html
-[device-flow]: https://www.rfc-editor.org/rfc/rfc8628.html
-[jwt-introspection]: https://tools.ietf.org/html/draft-ietf-oauth-jwt-introspection-response-10
-[sponsor-auth0]: https://a0.to/try-auth0
-[mtls]: https://www.rfc-editor.org/rfc/rfc8705.html
-[dpop]: https://tools.ietf.org/html/draft-ietf-oauth-dpop-11
-[resource-indicators]: https://www.rfc-editor.org/rfc/rfc8707.html
-[jarm]: https://openid.net/specs/oauth-v2-jarm.html
-[jwt-at]: https://www.rfc-editor.org/rfc/rfc9068.html
-[support-sponsor]: https://github.com/sponsors/panva
-[par]: https://www.rfc-editor.org/rfc/rfc9126.html
-[rpinitiated-logout]: https://openid.net/specs/openid-connect-rpinitiated-1_0-final.html
-[iss-auth-resp]: https://www.rfc-editor.org/rfc/rfc9207.html
-[fapi]: https://openid.net/specs/openid-financial-api-part-2-1_0.html
-[ciba]: https://openid.net/specs/openid-client-initiated-backchannel-authentication-core-1_0-final.html
-[fapi-ciba]: https://openid.net/specs/openid-financial-api-ciba-ID1.html
+```

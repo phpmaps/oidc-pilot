@@ -12,7 +12,7 @@ import { initSession } from '../incode/init.js';
 import { clientTenant } from '../incode/client.js';
 import { getScores } from '../incode/api/get-scores.js';
 import { getOcr } from '../incode/api/get-ocr.js';
-import { flatten } from '../incode/helpers/flatten.js';
+import { extraProcessing } from '../incode/helpers/extra-processing.js';
 
 const body = urlencoded({ extended: false });
 
@@ -180,7 +180,11 @@ export default (app, provider) => {
           },
         };
 
+        //Gets images and deletes the identity verification session from Incode's platform 
+        const finish = extraProcessing(clientTenant, interview.id, incode.header);
+
         await provider.interactionFinished(req, res, result, { mergeWithLastSubmission: false });
+        
       }
 
 

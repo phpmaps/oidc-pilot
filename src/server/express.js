@@ -53,7 +53,7 @@ try {
       } else {
         res.status(400).json({
           error: 'invalid_request',
-          error_description: 'do yourself a favor and only use https',
+          error_description: 'please use https',
         });
       }
     });
