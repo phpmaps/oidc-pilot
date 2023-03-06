@@ -41,6 +41,7 @@ async function getInteraction(req, res) {
   if (!id) {
     throw new SessionNotFound('interaction session id cookie not found');
   }
+  //TODO Doogs handle when session / interaction is missing
   const interaction = await this.Interaction.find(id);
   if (!interaction) {
     throw new SessionNotFound('interaction session not found');

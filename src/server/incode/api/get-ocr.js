@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import moment from 'moment/moment.js';
 import { doGet } from '../helpers/http-get.js';
 
 dotenv.config();
@@ -6,7 +7,11 @@ dotenv.config();
 const formatDate = (milliseconds)=> {
     let d = null;
     if(milliseconds) {
-        d = new Date(milliseconds).toISOString().split('T')[0]
+        const dt = new Date(parseInt(milliseconds));
+        const month = dt.getUTCMonth() + 1; 
+        const day = dt.getUTCDate();
+        const year = dt.getUTCFullYear();
+        d = `${month}-${day}-${year}`;
     }
     return d
 }
@@ -19,16 +24,14 @@ export const getOcr = async (client, interviewId, header) => {
     try {
         const ocrData = await doGet(url, header);
         const ocr = ocrData.body;
-        console.log(ocr);
 
-        let data = {
-            ...ocr?.name, 
-            ...ocr?.fullAddress, 
-            ...ocr?.documentNumber, 
-            ...ocr?.documentType, 
-            ...ocr?.typeOfId,
-            ...ocr?.gender
-        };
+        let data = {...ocr?.name};
+        data.address = ocr?.address;
+        data.documentNumber = ocr?.documentNumber;
+        data.typeOfId = ocr?.typeOfId;
+        data.gender = ocr?.gender;
+        data.fullNameMrz = ocr?.fullNameMrz;
+        data.barcodeRawData = ocr?.barcodeRawData;
 
         data.issuedAt = formatDate(ocr?.issuedAt);
         data.expireAt = formatDate(ocr?.expireAt);
@@ -36,10 +39,11 @@ export const getOcr = async (client, interviewId, header) => {
 
         return {
             data: data,
-            ocr: ocr.body
+            ocr: ocrData.body
         }
 
     } catch (error) {
-        throw Error(`error using ${endpoint}`);
+        let data = {};
+        return data.ocrError = "Something went wrong.";
     }
 };

@@ -9,9 +9,6 @@ export const addCustomField = async (client, fields, header) => {
     const url = `${client.API_URL}/${endpoint}`;
 
     try {
-        console.log(url);
-        console.log(header);
-        console.log(fields);
         const resp = await doPost(url, header, fields);
         return resp.body;
 

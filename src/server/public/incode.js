@@ -1,14 +1,8 @@
 window.onload = (event) => {
-    console.log("page is fully loaded");
     const interviewId = document.getElementById('interviewId').value;
     const flow = JSON.parse(document.getElementById('interview').value);
-    console.log(flow);
-    console.log(interviewId);
     if (flow && flow?.id === interviewId && flow?.apiUrl && flow?.key && flow?.uid) {
-        console.log("conditions met")
         interval = setInterval(heartbeat, 2000, flow);
-    } else {
-        console.log("conditions not met")
     }
 };
 

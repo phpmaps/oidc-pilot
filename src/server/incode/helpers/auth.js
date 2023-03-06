@@ -31,7 +31,6 @@ export class Auth {
                 }
             };
             const customFields = await addCustomField(this.client, fields, header);
-            console.log(customFields);
         }
 
         if (this.invokedFrom === 'login') {
@@ -41,7 +40,6 @@ export class Auth {
                 }
             };
             const customFields = await addCustomField(this.client, fields, header);
-            console.log(customFields);
         }
 
         return {

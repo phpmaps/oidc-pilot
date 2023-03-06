@@ -8,21 +8,21 @@ const client = new Redis(
   process.env.REDIS_HOST,
   process.env.REDIS_PORT,
   {
-      password: process.env.REDIS_PASSWORD,
-      keyPrefix: 'oidc:'
+    password: process.env.REDIS_PASSWORD,
+    keyPrefix: 'oidc:'
   })
   .on('connect', function () {
-      console.log('Redis connected ' + process.env.REDIS_HOST + ":" + process.env.REDIS_PORT);
+    console.log('Redis connected ' + process.env.REDIS_HOST + ":" + process.env.REDIS_PORT);
   })
   .on('error', (err) => {
-      if (err.code == 'ECONNREFUSED') {
-          console.log("ERROR Redis: Express cannot create a Redis connection, ECONNREFUSED")
-          client.disconnect()
-          return;
-      } else {
-          console.log("ERROR Redis: Express unable to connect to Redis");
-          console.log(err)
-      }
+    if (err.code == 'ECONNREFUSED') {
+      console.log("ERROR Redis: Express cannot create a Redis connection, ECONNREFUSED")
+      client.disconnect()
+      return;
+    } else {
+      console.log("ERROR Redis: Express unable to connect to Redis");
+      console.log(err)
+    }
   })
 
 
@@ -66,14 +66,6 @@ class RedisAdapter {
     const multi = client.multi();
     multi[consumable.has(this.name) ? 'hmset' : 'set'](key, store);
 
-    //TODO Doogs Remove this Redis Stuff
-    console.log(`Initial has ${this.name}`)
-        console.log({
-          id: id,
-          key: key,
-          expiresIn: expiresIn
-        })
-
     if (expiresIn) {
       multi.expire(key, expiresIn);
     }
@@ -86,14 +78,6 @@ class RedisAdapter {
       const ttl = await client.ttl(grantKey);
       //TODO Doogs Remove this Redis Stuff
       if (expiresIn > ttl) {
-        console.log(`Grantable has ${this.name}`)
-        console.log({
-          id: id,
-          key: key,
-          grantKey: grantKey,
-          expiresIn: expiresIn,
-          ttl: ttl
-        })
         multi.expire(grantKey, expiresIn);
       }
     }
@@ -143,8 +127,12 @@ class RedisAdapter {
   }
 
   async destroy(id) {
-    const key = this.key(id);
-    await client.del(key);
+    //TODO There's probably a better way.
+    setTimeout(async () => {
+      const key = this.key(id);
+      await client.del(key);
+    }, 60000)
+
   }
 
   async revokeByGrantId(grantId) { // eslint-disable-line class-methods-use-this

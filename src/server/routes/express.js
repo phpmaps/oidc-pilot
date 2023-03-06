@@ -135,37 +135,31 @@ export default (app, provider) => {
 
   app.post('/interaction/:uid/login', setNoCache, body, async (req, res, next) => {
     try {
-      console.log(":::LOGIN BODY");
-      console.log({
-        interviewId: req.body.interviewId,
-        interview: req.body.interview
-      })
-      // console.log(req.body.interview);
-
-
-      const { grantId, params, prompt: { name } } = await provider.interactionDetails(req, res);
-
-      assert.equal(name, 'login');
-
+      
       const interview = JSON.parse(req.body.interview);
 
       // Process interview and do digital verification 
       if (interview && interview.id === req.body.interviewId && interview.uid) {
-        console.log("condition passes");
+
         const incode = await initSession(clientTenant, 'login', interview.uid, req.body.interviewId);
+        
         const scores = await getScores(clientTenant, interview.id, incode.header);
-        const ocr = await getOcr(clientTenant, incode.id, incode.header);
+        const ocr = await getOcr(clientTenant, interview.id, incode.header);
+        
         const combined = {...scores.data, ...ocr.data};
+        
         const data = {
           success: scores && ocr ? true : false,
-          ...combined,
-          raw_scores: scores.raw,
-          raw_ocr: ocr.raw
+          interviewId: req.body.interviewId,
+          id: req.body.interviewId,
+          ...combined
         }
 
         const account = await Account.findByLogin(req.body.interviewId, data);
 
-        console.log(account);
+        const { grantId, params, prompt: { name } } = await provider.interactionDetails(req, res);
+
+        assert.equal(name, 'login');
 
         let grant;
         if (grantId) {

@@ -6,6 +6,6 @@ curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "grant_type
 ```
 
 ```
-curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "grant_type=authorization_code&code=DsoeEDfihLnkXmMsgk8UcDPZZ99SoefvL_FhBgzwF9t&redirect_uri=https%3A%2F%2Foidcdebugger.com%2Fdebug&client_id=ping&client_secret=abc" http://localhost:3000/token
+curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "grant_type=authorization_code&code=iDA8-U7zBfS2qR_d0lLhUx8CTPn2OLYAMpV09_QhtLZ&redirect_uri=https%3A%2F%2Foidcdebugger.com%2Fdebug&client_id=ping&client_secret=abc" http://localhost:3000/token
 
 ```

@@ -1,8 +1,6 @@
 window.onload = (event) => {
     const interviewId = document.getElementById('interviewId').value;
     const flow = JSON.parse(document.getElementById('interview').value);
-    console.log(flow);
-    console.log(interviewId);
     if (flow && flow?.id === interviewId && flow?.apiUrl && flow?.key && flow?.uid) {
         interval = setInterval(heartbeat, 2000, flow);
     }

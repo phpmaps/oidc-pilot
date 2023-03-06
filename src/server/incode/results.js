@@ -21,8 +21,8 @@ export const fetchResults = async (interviewId, token) => {
 
     const data = { ...scores, ...ocr };
     const flattenData = flatten(data);
-    console.log(":::Incode Results")
-    console.log(flattenData);
+    //console.log(":::Incode Results")
+    //console.log(flattenData);
 
     //run delete api
 

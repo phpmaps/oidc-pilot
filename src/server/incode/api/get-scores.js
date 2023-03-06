@@ -23,10 +23,6 @@ export const getScores = async (client, interviewId, header) => {
 
         }
 
-        //Adding ID for mapping Ping
-        data.id = interviewId || 'NO_INTERVIEW_ID';
-
-
         if(scores.body?.idValidation?.idSpecific){
             const idSpecific = scores.body?.idValidation?.idSpecific;
             const barcode2DDetected = idSpecific.find(({ key }) => key === "barcode2DDetected");
@@ -76,11 +72,7 @@ export const getScores = async (client, interviewId, header) => {
         }
     
     } catch (error) {
-        console.log("Could not fetch incode scores.")
-        return {
-            data: {},
-            scoresError: true, 
-            scores: {}
-        }
+        let data = {};
+        return data.scoresError = "Something went wrong.";
     }
 };

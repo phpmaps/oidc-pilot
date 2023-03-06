@@ -213,23 +213,12 @@ export const handler = async function authorizationCodeHandler(ctx, next) {
     token.mask = claims;
     token.rejected = rejected;
 
-    // console.log("code");
-    // console.log(code);
-    // console.log("account")
-    // console.log(account);
-
-    // console.log('test')
-    // console.log(JSON.parse(account.profile));
-    // const incode = JSON.parse(account.profile);
-
-    //TODO: Doogs handle ID_TOKEN results
+    //TODO: Doogs alternative for handling ID_TOKEN results
+    //TODO Doogs using token from account add grantId, sessionUid and authTime to customfields code.sessionUid and code.grantId and code.authTime
     token.set('nonce', code.nonce);
     token.set('at_hash', accessToken);
     token.set('sid', code.sid);
-    token.set('hello', 'world');
-    //token.set('results', incode?.auth?.interviewId);
     token.set('data', account.profile)
-    //TODO Doogs using token from account add grantId, sessionUid and authTime to customfields code.sessionUid and code.grantId and code.authTime
 
     idToken = await token.issue({ use: 'idtoken' });
   }

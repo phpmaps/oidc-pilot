@@ -39,7 +39,7 @@ try {
 
   if (prod) {
     app.enable('trust proxy');
-    provider.proxy = true;
+    provider.proxy = false;
 
     app.use((req, res, next) => {
       if (req.secure) {

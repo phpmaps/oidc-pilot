@@ -29,6 +29,8 @@ export default async function resumeAction(allowLisst, resumeRouteName, ctx, nex
   }
   ctx.oidc.entity('Interaction', interactionSession);
 
+  //TODO: Doogs handle side effects of no session or cookie
+
   if (cookieId !== interactionSession.uid) {
     throw new errors.SessionNotFound('authorization session and cookie identifier mismatch');
   }
